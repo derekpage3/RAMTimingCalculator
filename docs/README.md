@@ -1,6 +1,4 @@
-DDR5 Memory Timing Calculator
-
-<img alt="application image" width="50px" height="50px" src="./images/icon-memory-calc.png" />
+<img alt="application image" width="50px" height="50px" src="./images/icon-memory-calc.png" />DDR5 Memory Timing Calculator
 
 * * *
 

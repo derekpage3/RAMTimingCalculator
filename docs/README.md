@@ -34,7 +34,7 @@ The following calculations are provided for each timing:
 *   **Lower** - the calculated value, rounded down to the nearest whole number
 *   **Higher** - the calculated value, rounded up to the nearest whole number.
 
-For the majority of timings, the **Lower** value will equate to less time than that timing does at the **Source Speed**, and so is less likely to be stable at your target speed; the **Higher** value will be the safer bet, but isn't necessarily guaranteed to be stable either. As always, proper RAM stability tests are MANDATORY in this endeavor! See the [Stability Tests](#hdrStabilityTests) section for recommended RAM stability tests.
+For the majority of timings, the **Lower** value will equate to less time than that timing does at the **Source Speed**, and so is less likely to be stable at your target speed; the **Higher** value will be the safer bet, but isn't necessarily guaranteed to be stable either. As always, proper RAM stability tests are MANDATORY in this endeavor! See the <a href="#hdrStabilityTests">Stability Tests</a> section for recommended RAM stability tests.
 
 And this is literally all there is to this application - it is a simple timing converter, nothing more, nothing less (though I may continue to enhance it in the future).
 
@@ -47,13 +47,13 @@ The application is provided in a single file which you can run on any computer.
 
 #### 1\. Install Java (if you don't already have it installed)
 
-The application is written entirely in Java, so you will need to have the Java Runtime Environment installed on your system to use the application. You can download the latest installer directly from Oracle [here](https://www.java.com/en/download/). Once downloaded, run the installer and it will install Java to your system and register it for use by Java programs.
+The application is written entirely in Java, so you will need to have the Java Runtime Environment installed on your system to use the application. You can download the latest installer directly from Oracle <a target="_blank" href="https://www.java.com/en/download/">here</a>. Once downloaded, run the installer and it will install Java to your system and register it for use by Java programs.
 
 ![](./images/java-install-screenshot.png)
 
 #### 2\. Running the application
 
-The application itself doesn't have or need an installer. Simply download the latest [release](https://github.com/derekpage3/RAMTimingCalculator/releases/) of the application and save it to a location of your choosing; once downloaded, if Java is installed correctly you should be able to double-click on it to run the application.
+The application itself doesn't have or need an installer. Simply download the latest  <a target="_blank" href="https://github.com/derekpage3/RAMTimingCalculator/releases/">release</a> of the application and save it to a location of your choosing; once downloaded, if Java is installed correctly you should be able to double-click on it to run the application.
 
 ![](./images/app-install-screenshot.png)  
 **NOTE:** If for some reason the double-click approach doesn't work, open a command prompt in the folder containing the application and run the following command:
@@ -82,7 +82,9 @@ The above explanation is a **VERY** simplistic explanation of RAM timings, but i
 
 For all the reasons above and more, the application is **NOT** by any means a foolproof easy "one click and go auto-overclock" application that will reliably give you all the settings you need every time. It is a very simple tool, that uses very simple calculations, to give you a starting point to work with, but you will still need to put in the work required of any memory overclock.
 
-There are many others who can, and have, explained this topic MUCH better than I ever could, so I wont attempt to dive any deeper here. See the [Recommended Sources](#hdrRecResources) section for additional resources that further explore the topic.
+There are many others who can, and have, explained this topic MUCH better than I ever could, so I wont attempt to dive any deeper here. See the <a href="#hdrRecResources">Recommended Sources</a> section for additional resources that further explore the topic.
+
+<h2 id="hdrStabilityTests">Stability Tests</h2>
 
 Stability Tests
 ---------------
@@ -93,6 +95,8 @@ The following programs provide targeted stability tests for RAM, which are cruci
 *   [Karhu RAM Test](https://www.karhusoftware.com/ramtest/#introduction) - another solid RAM test application I have had success with exposing unstable RAM overclocks that other tests missed.
 *   [OCCT](https://www.ocbase.com/) - A general validation tool for all aspects of overclocking. Provides a RAM test for further validation.
 *   [HCI Memtest](https://hcidesign.com/memtest/download.html) - another stability test I've had good luck with in the past.
+
+<h2 id="hdrRecResources">Recommended Sources</h2>
 
 Recommended Sources
 -------------------

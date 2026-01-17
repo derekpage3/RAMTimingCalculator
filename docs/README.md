@@ -85,21 +85,18 @@ There are many others who can, and have, explained this topic MUCH better than I
 
 The following programs provide targeted stability tests for RAM, which are crucial to validating your overclock results are truly stable. While some are better than others, you'll want to use multiple, as some programs are more effective at catching certain types of memory instability than others are. Each program has its strengths and weaknesses, and the more stability tests you can pass, the more confident you can be in your overclock.
 
-*   [Testmem5](https://testmem5.com/) - One of the best program for RAM stability testing. (**NOTE:** You'll need to download the [extreme@anta777](https://github.com/integralfx/MemTestHelper/blob/oc-guide/TM5-Configs/extreme%40anta777.cfg) test configuration specifically for this application.)
-*   [Karhu RAM Test](https://www.karhusoftware.com/ramtest/#introduction) - another solid RAM test application I have had success with exposing unstable RAM overclocks that other tests missed.
-*   [OCCT](https://www.ocbase.com/) - A general validation tool for all aspects of overclocking. Provides a RAM test for further validation.
-*   [HCI Memtest](https://hcidesign.com/memtest/download.html) - another stability test I've had good luck with in the past.
+*   <a target="_blank" href="https://testmem5.com/">Testmem5</a> - One of the best program for RAM stability testing. (**NOTE:** You'll need to download the <a target="_blank" href="https://github.com/integralfx/MemTestHelper/blob/oc-guide/TM5-Configs/extreme%40anta777.cfg">extreme@anta777</a> test configuration specifically for this application.)
+*   <a target="_blank" href="https://www.karhusoftware.com/ramtest/#introduction">Karhu RAM Test</a> - another solid RAM test application I have had success with exposing unstable RAM overclocks that other tests missed.
+*   <a target="_blank" href="https://www.ocbase.com/">OCCT</a> - A general validation tool for all aspects of overclocking. Provides a RAM test for further validation.
+*   <a target="_blank" href="https://hcidesign.com/memtest/download.html">HCI Memtest</a> - another stability test I've had good luck with in the past.
 
 <h2 id="hdrRecResources">Recommended Sources</h2>
 
-Recommended Sources
--------------------
-
 For a deeper dive into all things RAM overclocking, see the following excellent resources:
 
-*   [Actually Hardcore Overclocking (AKA Buildzoid)](https://www.youtube.com/@ActuallyHardcoreOverclocking)
-*   [integralfx DDR4 OC Guide](https://github.com/integralfx/MemTestHelper/blob/oc-guide/DDR4%20OC%20Guide.md) (much of this material applies to DDR5 as well).
-*   [GamersNexus - What Are Memory Timings? CAS Latency, tRCD, tRP, & tRAS](https://gamersnexus.net/guides/3333-memory-timings-defined-cas-latency-trcd-trp-tras)
+*   <a target="_blank" href="https://www.youtube.com/@ActuallyHardcoreOverclocking">Actually Hardcore Overclocking (AKA Buildzoid)</a>
+*   <a target="_blank" href="https://github.com/integralfx/MemTestHelper/blob/oc-guide/DDR4%20OC%20Guide.md">integralfx DDR4 OC Guide</a> (much of this material applies to DDR5 as well).
+*   <a target="_blank" href="https://gamersnexus.net/guides/3333-memory-timings-defined-cas-latency-trcd-trp-tras">GamersNexus - What Are Memory Timings? CAS Latency, tRCD, tRP, & tRAS</a>
 
 FAQ
 ---

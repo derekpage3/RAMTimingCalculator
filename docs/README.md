@@ -12,7 +12,7 @@ This app is a VERY simple calculator for use when overclocking DDR RAM. It allow
 How to use it
 -------------
 
-Once you [download](https://github.com/derekpage3/RAMTimingCalculator/releases/) and [install](#headerInstall) the application, run the program. Once launched, you will see a basic screen as shown below:
+Once you [download](https://github.com/derekpage3/RAMTimingCalculator/releases/) and <a href="#headerInstall">install</a> the application, run the program. Once launched, you will see a basic screen as shown below:
 
 ![app screenshot](./images/app-sceenshot-1.png)
 
@@ -37,6 +37,8 @@ The following calculations are provided for each timing:
 For the majority of timings, the **Lower** value will equate to less time than that timing does at the **Source Speed**, and so is less likely to be stable at your target speed; the **Higher** value will be the safer bet, but isn't necessarily guaranteed to be stable either. As always, proper RAM stability tests are MANDATORY in this endeavor! See the [Stability Tests](#hdrStabilityTests) section for recommended RAM stability tests.
 
 And this is literally all there is to this application - it is a simple timing converter, nothing more, nothing less (though I may continue to enhance it in the future).
+
+<h2 id="headerInstall">Installation and Launch</h2>
 
 Installation and Launch
 -----------------------

@@ -12,7 +12,7 @@ This app is a VERY simple calculator for use when overclocking DDR RAM. It allow
 How to use it
 -------------
 
-Once you [download](https://github.com/derekpage3/RAMTimingCalculator/releases/) and <a href="#headerInstall">install</a> the application, run the program. Once launched, you will see a basic screen as shown below:
+Once you <a target="_blank" href="https://github.com/derekpage3/RAMTimingCalculator/releases/">download</a> and <a href="#headerInstall">install</a> the application, run the program. Once launched, you will see a basic screen as shown below:
 
 ![app screenshot](./images/app-sceenshot-1.png)
 
@@ -39,9 +39,6 @@ For the majority of timings, the **Lower** value will equate to less time than t
 And this is literally all there is to this application - it is a simple timing converter, nothing more, nothing less (though I may continue to enhance it in the future).
 
 <h2 id="headerInstall">Installation and Launch</h2>
-
-Installation and Launch
------------------------
 
 The application is provided in a single file which you can run on any computer.
 
@@ -85,9 +82,6 @@ For all the reasons above and more, the application is **NOT** by any means a fo
 There are many others who can, and have, explained this topic MUCH better than I ever could, so I wont attempt to dive any deeper here. See the <a href="#hdrRecResources">Recommended Sources</a> section for additional resources that further explore the topic.
 
 <h2 id="hdrStabilityTests">Stability Tests</h2>
-
-Stability Tests
----------------
 
 The following programs provide targeted stability tests for RAM, which are crucial to validating your overclock results are truly stable. While some are better than others, you'll want to use multiple, as some programs are more effective at catching certain types of memory instability than others are. Each program has its strengths and weaknesses, and the more stability tests you can pass, the more confident you can be in your overclock.
 

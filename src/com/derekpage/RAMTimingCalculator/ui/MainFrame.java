@@ -4,16 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * This subclass of JFrame exists to fix certain out of box issues with the core JFrame class (mainly sizing issues).
+ * This subclass of JFrame simply exists to encapsulate default JFrame options we always want to apply.
  */
 public class MainFrame extends JFrame {
 
-    //Internal constant that represents the expected with the Iconify/Deiconify/Close buttons of the top-level frame
-    //Used for calculating minimum window sizing on initialization.  NOTE: This was derived in Win10 on a 1440p monitor
-    //at 125% DPI, and probably doesn't scale correctly at other resolutions/DPI settings.
-    private static final int MIN_MAX_CLOSE_WIDTH = 175;
-
-
+    /// CONSTRUCTORS ///
 
     public MainFrame() throws HeadlessException {
         super();
@@ -36,14 +31,12 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * This method defines all the customizations and overriddien behaviors we do on JFrame upon initialization.
+     * This method defines all the customizations and overridden behaviors we do on JFrame upon initialization.
      */
     protected void init() {
-        //TODO
-    }
 
-    @Override
-    public void setMinimumSize(Dimension minimumSize) {
-        super.setMinimumSize(minimumSize);
+        //Default to EXIT_ON_CLOSE
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setResizable(false);
     }
 }

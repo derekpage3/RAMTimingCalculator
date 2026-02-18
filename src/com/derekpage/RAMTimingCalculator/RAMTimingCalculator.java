@@ -3,10 +3,13 @@ package com.derekpage.RAMTimingCalculator;
 import com.derekpage.RAMTimingCalculator.action.AboutMenuAction;
 import com.derekpage.RAMTimingCalculator.action.CalculateAction;
 import com.derekpage.RAMTimingCalculator.action.OpenInstructionsAction;
+import com.derekpage.RAMTimingCalculator.action.SpinnerMouseWheelModel;
 import com.derekpage.RAMTimingCalculator.data.TimingDefinitionStruct;
 import com.derekpage.RAMTimingCalculator.html.HTMLLoader;
 import com.derekpage.RAMTimingCalculator.img.ImageLoader;
 import com.derekpage.RAMTimingCalculator.logging.Logger;
+import com.derekpage.RAMTimingCalculator.ui.JHighlightSpinner;
+import com.derekpage.RAMTimingCalculator.ui.MainFrame;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -26,6 +29,9 @@ public class RAMTimingCalculator {
     protected JSpinner spSourceSpeed = null;
     protected JSpinner spTargetSpeed = null;
 
+    //Keeps a reference to a sole instance of the CalculateAction.
+    protected Action _calculateActionInstance = null;
+
     //Map of all the input fields for the source timing selections.
     private final Map<String, JSpinner> sourceTimings = new HashMap<>(AppConstants.RAM_TIMINGS.length);
 
@@ -35,14 +41,38 @@ public class RAMTimingCalculator {
     private final Map<String, JTextField> targetTimingsCalc = new HashMap<>(AppConstants.RAM_TIMINGS.length);
     private final Map<String, JTextField> targetTimingsMax = new HashMap<>(AppConstants.RAM_TIMINGS.length);
 
+    /**
+     * @param args:
+     *            LogLevel=<Logger level>
+     *
+     * NOTE: Core application class constructor takes care of initialization.
+     */
+    public static void main(String[] args) {
+        long st = System.currentTimeMillis();
+
+        //Set logging level if command line argument set for it.
+        for (String arg : args) {
+            arg = arg.toUpperCase();
+
+            //Initialize log level if specified.
+            if (arg.startsWith(AppConstants.LOG_LEVEL)) {
+                Logger.setLogLevelByName(arg.substring(9));
+            }
+        }
+
+        //Init app
+        new RAMTimingCalculator();
+        Logger.debug("App started in " + (System.currentTimeMillis() - st) + " ms");
+    }
+
+    /**
+     * Sole initializer of the application.
+     */
     public RAMTimingCalculator() {
 
         //Build the top-level frame.
-        JFrame mf = new JFrame();
+        JFrame mf = new MainFrame(AppConstants.APP_NAME);
         this.mf = mf;
-        mf.setTitle(AppConstants.APP_NAME);
-        mf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mf.setResizable(false);
 
         //Initialize app panels
         this.initializeAppIconImage();
@@ -50,9 +80,10 @@ public class RAMTimingCalculator {
         this.initializeTopPanel();
         this.initializeTimingsPanel();
         this.initializeBottomPanel();
-            //TODO get the window to open up centered on the screen.
-        //Pack and show.
-        mf.pack();
+
+        //Pack, center and display app.
+        //TODO now can you make it save and restore it's last position? ;)
+        this.packAndCenterApp();
         mf.setVisible(true);
     }
 
@@ -119,18 +150,21 @@ public class RAMTimingCalculator {
         lblSrcSpeed.setBorder(lblBorder);
         lblSrcSpeed.setHorizontalAlignment(SwingConstants.RIGHT);
         pnlSpeedSelections.add(lblSrcSpeed);
-        pnlSpeedSelections.add(this.spSourceSpeed = new JSpinner(getSpeedSelectionModel(AppConstants.DEFAULT_SOURCE_SPEED)));
+        pnlSpeedSelections.add(this.spSourceSpeed = this.createJHighlightSpinner(getSpeedSelectionModel(AppConstants.DEFAULT_SOURCE_SPEED)));
+        this.spSourceSpeed.addMouseWheelListener(new SpinnerMouseWheelModel());
+
 
         //Increase the source speed label Font by 1 point.
         //Mainly doing this to force the source speed spinner box to be larger.
-        lblSrcSpeed.setFont(new Font(lblSrcSpeed.getFont().getFontName(), lblSrcSpeed.getFont().getStyle(), (lblSrcSpeed.getFont().getSize()+2)));
+        lblSrcSpeed.setFont(new Font(lblSrcSpeed.getFont().getFontName(), lblSrcSpeed.getFont().getStyle(), (lblSrcSpeed.getFont().getSize() + 2)));
 
         //Add the Target Speed selection
         JLabel lblTargetSpeed = new JLabel("Target Speed (MT/s):");
         lblTargetSpeed.setBorder(lblBorder);
         lblTargetSpeed.setHorizontalAlignment(SwingConstants.RIGHT);
         pnlSpeedSelections.add(lblTargetSpeed);
-        pnlSpeedSelections.add(this.spTargetSpeed = new JSpinner(getSpeedSelectionModel(AppConstants.DEFAULT_TARGET_SPEED)));
+        pnlSpeedSelections.add(this.spTargetSpeed = this.createJHighlightSpinner(getSpeedSelectionModel(AppConstants.DEFAULT_TARGET_SPEED)));
+        this.spTargetSpeed.addMouseWheelListener(new SpinnerMouseWheelModel());
 
         //Increase the target speed label Font by 1 point.
         //Mainly doing this to force the target speed spinner box to be larger.
@@ -151,65 +185,16 @@ public class RAMTimingCalculator {
         pnlTimingEntry.setLayout(new GridLayout(0, 6));
         this.mf.getContentPane().add(pnlTimingEntry, BorderLayout.CENTER);
 
-        //Border for padding on all labels
-        Border lblBorder = this.getTimingFieldLabelBorder();
-
         //Font that will be used for the header labels.
         Font hdrFont = null;
 
-        //Timing field label header.
-        JLabel lblTimingName = new JLabel("Timing");
-        lblTimingName.setName("hdrTiming");
-        lblTimingName.setBorder(lblBorder);
-        lblTimingName.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTimingName.setBorder(BorderFactory.createEtchedBorder());
-        lblTimingName.setFocusable(false);
-        lblTimingName.setToolTipText("The name of the memory timing (in AMD terminology)");
-
-        //Value selection header.
-        JLabel lblTimingValue = new JLabel("Value");
-        lblTimingValue.setName("hdrValue");
-        lblTimingValue.setBorder(lblBorder);
-        lblTimingValue.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTimingValue.setBorder(BorderFactory.createEtchedBorder());
-        lblTimingValue.setFocusable(false);
-        lblTimingValue.setToolTipText("The value for the timing at the source speed");
-
-        //Source timing NS conversion header.
-        JLabel lblTimingNS = new JLabel("Cycle Time");
-        lblTimingNS.setName("hdrNS");
-        lblTimingNS.setBorder(lblBorder);
-        lblTimingNS.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTimingNS.setBorder(BorderFactory.createEtchedBorder());
-        lblTimingNS.setFocusable(false);
-        lblTimingNS.setToolTipText("The time (in nanoseconds) the timing value equates to at the source speed");
-
-        //Lower target timing header.
-        JLabel lblLowerTiming = new JLabel("Lower");
-        lblLowerTiming.setName("hdrLower");
-        lblLowerTiming.setBorder(lblBorder);
-        lblLowerTiming.setHorizontalAlignment(SwingConstants.CENTER);
-        lblLowerTiming.setBorder(BorderFactory.createEtchedBorder());
-        lblLowerTiming.setFocusable(false);
-        lblLowerTiming.setToolTipText("The lowest integer value for this timing based on the calculated conversion; this may work, depending on the timing but is not guaranteed.");
-
-        //Calculated target timing value.
-        JLabel lblTargetTimingCalc = new JLabel("Calc");
-        lblTargetTimingCalc.setName("hdrCalc");
-        lblTargetTimingCalc.setBorder(lblBorder);
-        lblTargetTimingCalc.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTargetTimingCalc.setBorder(BorderFactory.createEtchedBorder());
-        lblTargetTimingCalc.setFocusable(false);
-        lblTargetTimingCalc.setToolTipText("The scaled timing value based on the source to target speed conversion.");
-
-        //Higher target timing header.
-        JLabel lblHigherTiming = new JLabel("Higher");
-        lblHigherTiming.setName("hdrHigher");
-        lblHigherTiming.setBorder(lblBorder);
-        lblHigherTiming.setHorizontalAlignment(SwingConstants.CENTER);
-        lblHigherTiming.setBorder(BorderFactory.createEtchedBorder());
-        lblHigherTiming.setFocusable(false);
-        lblHigherTiming.setToolTipText("The highest integer value for this timing based on the calculated conversion; this SHOULD be stable for most timings as it will always equate to the source cycle time or more.");
+        //Build header labels.
+        JLabel lblTimingName = this.createHeaderLabel("Timing", "hdrTiming", "The name of the memory timing (in AMD terminology)");
+        JLabel lblTimingValue = this.createHeaderLabel("Value", "hdrValue", "The value for the timing at the source speed");
+        JLabel lblTimingNS = this.createHeaderLabel("Cycle Time", "hdrNS", "The time (in nanoseconds) the timing value equates to at the source speed");
+        JLabel lblLowerTiming = this.createHeaderLabel("Lower", "hdrLower", "The lowest integer value for this timing based on the calculated conversion; this may work, depending on the timing but is not guaranteed.");
+        JLabel lblTargetTimingCalc = this.createHeaderLabel("Calc", "hdrCalc", "The scaled timing value based on the source to target speed conversion.");
+        JLabel lblHigherTiming = this.createHeaderLabel("Higher", "hdrHigher", "The highest integer value for this timing based on the calculated conversion; this SHOULD be stable for most timings as it will always equate to the source cycle time or more.");
 
         //Create the header font and set on header labels. For this we take whatever the default size is that the
         //system sets and then add a few point sizes to make it stand out.
@@ -233,77 +218,7 @@ public class RAMTimingCalculator {
 
         //Add a label/text field combo for each supported timing.
         for (TimingDefinitionStruct tds : AppConstants.RAM_TIMINGS) {
-            String currTimingName = tds.getTimingName();
-
-            //1. Build Label for the timing value.
-            JLabel lbl = new JLabel(currTimingName);
-            lbl.setBorder(BorderFactory.createEtchedBorder());
-            lbl.setHorizontalTextPosition(SwingConstants.RIGHT);
-            lbl.setHorizontalAlignment(SwingConstants.RIGHT);
-            lbl.setVerticalTextPosition(SwingConstants.CENTER);
-            lbl.setText(currTimingName);
-            lbl.setName("lbl" + currTimingName);
-            lbl.setFocusable(false);
-
-            //1a. Get ToolTip HTML for current timing if present.
-            //String ttext = HTMLLoader.loadFromFile(RAMTimingCalculator.AppConstants.HELP_FILE_REL_PATH + tds.getTimingName() + ".html");
-            String ttext = HTMLLoader.loadHTMLHelpFile(tds.getTimingName() + ".html");
-            if (!ttext.isEmpty()) {
-                lbl.setToolTipText(ttext);
-            }
-
-            //2. Build input spinner for the source timing value entry.
-            JSpinner js = new JSpinner(
-                    new SpinnerNumberModel(tds.getDefaultValue(), 0, tds.getMaxValue(), 1)
-            );
-            js.setName("sp" + currTimingName);
-            js.setPreferredSize(new Dimension(80, -1));  //shrink the JSpinners to a more reasonable width.
-            lbl.setLabelFor(js);
-            this.sourceTimings.put(currTimingName, js);
-
-            //3. Build the textbox where the cycles-to-nanosecond conversion will be set.
-            JTextField txtNS = new JTextField();
-            txtNS.setColumns(5);
-            txtNS.setName("txt" + currTimingName + "_ns");
-            txtNS.setEditable(false);
-            txtNS.setFocusable(false);
-            txtNS.setHorizontalAlignment(JTextField.CENTER);
-            this.sourceTimingNS.put(currTimingName, txtNS);
-
-            //4. Build text field for minimum target timing value.
-            JTextField txtMinVal = new JTextField();
-            txtMinVal.setColumns(3);
-            txtMinVal.setName("txtMinVal" + currTimingName);
-            txtMinVal.setEditable(false);
-            txtMinVal.setFocusable(false);
-            txtMinVal.setHorizontalAlignment(JTextField.CENTER);
-            this.targetTimingsMin.put(currTimingName, txtMinVal);
-
-            //5. Build text field for the target cycle time.
-            JTextField txtNSVal = new JTextField();
-            txtNSVal.setColumns(3);
-            txtNSVal.setName("txtNSVal" + currTimingName);
-            txtNSVal.setEditable(false);
-            txtNSVal.setFocusable(false);
-            txtNSVal.setHorizontalAlignment(JTextField.CENTER);
-            this.targetTimingsCalc.put(currTimingName, txtNSVal);
-
-            //6. Build text field for the maximum target value.
-            JTextField txtMaxVal = new JTextField();
-            txtMaxVal.setColumns(3);
-            txtMaxVal.setName("txtMaxVal" + currTimingName);
-            txtMaxVal.setEditable(false);
-            txtMaxVal.setFocusable(false);
-            txtMaxVal.setHorizontalAlignment(JTextField.CENTER);
-            this.targetTimingsMax.put(currTimingName, txtMaxVal);
-
-            //Add inputs of current row to the panel.
-            pnlTimingEntry.add(lbl);
-            pnlTimingEntry.add(js);
-            pnlTimingEntry.add(txtNS);
-            pnlTimingEntry.add(txtMinVal);
-            pnlTimingEntry.add(txtNSVal);
-            pnlTimingEntry.add(txtMaxVal);
+            this.createTimingRow(pnlTimingEntry, tds);
         }
     }
 
@@ -327,7 +242,7 @@ public class RAMTimingCalculator {
         JPanel jp = new JPanel();
         jp.add(btnCalculate);
         pnlActionButtons.add(jp, BorderLayout.SOUTH);
-        btnCalculate.addActionListener(new CalculateAction(this));
+        btnCalculate.addActionListener(this.getCalculateAction());
     }
 
     /**
@@ -363,8 +278,171 @@ public class RAMTimingCalculator {
     }
 
     /**
+     * Initializer that packs the main frame after all components are added and attempts to center it on the screen.
+     */
+    private void packAndCenterApp() {
+
+        //Pack to preferred size.
+        this.mf.pack();
+
+        //Get the Graphics configuration for the display.
+        GraphicsConfiguration gConfig = this.mf.getGraphicsConfiguration();
+        if (gConfig != null) {
+            Rectangle screenDimensions = gConfig.getBounds();
+            if (screenDimensions != null) {
+                int appWidth = this.mf.getWidth();
+                int appHeight = this.mf.getHeight();
+
+                //Attempt to vertically and horizontally center the app by subtracting its width/height from the width/height of the screen
+                if (appHeight > 0 && appWidth > 0) {
+                    Rectangle newBounds = new Rectangle(this.mf.getBounds());
+                    newBounds.setLocation(((screenDimensions.width - appWidth) / 2), ((screenDimensions.height - appHeight) / 2));
+                    this.mf.setBounds(newBounds);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param lblText     the text the label will display
+     * @param lblName     the name property of the created JLabel
+     * @param toolTipText (optional) Tooltip text to display on hover over the label.
+     * @return JLabel
+     * <p>
+     * Returns a standardized JLabel for the headers of the table.
+     */
+    private JLabel createHeaderLabel(String lblText, String lblName, String toolTipText) {
+        if (lblText == null)
+            throw new IllegalArgumentException("Parameter 'lblText' is required!");
+        if (lblName == null)
+            throw new IllegalArgumentException("Parameter 'lblName' is required!");
+
+        //Build and return label.
+        JLabel lbl = new JLabel(lblText);
+        lbl.setName(lblName);
+        lbl.setBorder(this.getTimingFieldLabelBorder());
+        lbl.setHorizontalAlignment(SwingConstants.CENTER);
+        lbl.setBorder(BorderFactory.createEtchedBorder());
+        lbl.setFocusable(false);
+        if (toolTipText != null)
+            lbl.setToolTipText(toolTipText);
+        return lbl;
+    }
+
+    /**
+     * @param parent JPanel to add the created components to.
+     * @param tds    The TimingDefinitionStruct to add a row for.
+     *               <p>
+     *               Used to build a standard "row" in the timings panel.
+     */
+    private void createTimingRow(JPanel parent, TimingDefinitionStruct tds) {
+        if (parent == null)
+            throw new IllegalArgumentException("Parameter 'parent' is required!");
+        if (tds == null)
+            throw new IllegalArgumentException("Parameter 'tds' is required!");
+        String currTimingName = tds.getTimingName();
+
+        //timing label alignment is based on LTR orientation.
+        boolean ltr = parent.getComponentOrientation().isLeftToRight();
+
+        //1. Build Label for the timing value.
+        JLabel lbl = new JLabel(currTimingName);
+        lbl.setBorder(BorderFactory.createEtchedBorder());
+        lbl.setHorizontalTextPosition(ltr ? SwingConstants.RIGHT : SwingConstants.LEFT);
+        lbl.setHorizontalAlignment(ltr ? SwingConstants.RIGHT : SwingConstants.LEFT);
+        lbl.setVerticalTextPosition(SwingConstants.CENTER);
+        lbl.setText(currTimingName);
+        lbl.setName("lbl" + currTimingName);
+        lbl.setFocusable(false);
+
+        //1a. Get ToolTip HTML for current timing if present.
+        //String ttext = HTMLLoader.loadFromFile(RAMTimingCalculator.AppConstants.HELP_FILE_REL_PATH + tds.getTimingName() + ".html");
+        String ttext = HTMLLoader.loadHTMLHelpFile(tds.getTimingName() + ".html");
+        if (!ttext.isEmpty()) {
+            lbl.setToolTipText(ttext);
+        }
+
+        //2. Build input spinner for the source timing value entry.
+        Logger.debug("Timing: " + tds.getTimingName() + ", def: " + tds.getDefaultValue() + ", min: " + tds.getMinValue() + ", max: " + tds.getMaxValue());
+        JSpinner js = this.createJHighlightSpinner(new SpinnerNumberModel(
+                tds.getDefaultValue(),
+                tds.getMinValue(),
+                tds.getMaxValue(),
+                1
+        ));
+
+        js.setName("sp" + currTimingName);
+        js.setPreferredSize(new Dimension(80, -1));  //shrink the JSpinners to a more reasonable width.
+        js.addMouseWheelListener(new SpinnerMouseWheelModel());
+        lbl.setLabelFor(js);
+        this.sourceTimings.put(currTimingName, js);
+
+        //3. Build the textbox where the cycles-to-nanosecond conversion will be set.
+        JTextField txtNS = new JTextField();
+        txtNS.setColumns(5);
+        txtNS.setName("txt" + currTimingName + "_ns");
+        txtNS.setEditable(false);
+        txtNS.setFocusable(false);
+        txtNS.setHorizontalAlignment(JTextField.CENTER);
+        this.sourceTimingNS.put(currTimingName, txtNS);
+
+        //4. Build text field for minimum target timing value.
+        JTextField txtMinVal = new JTextField();
+        txtMinVal.setColumns(3);
+        txtMinVal.setName("txtMinVal" + currTimingName);
+        txtMinVal.setEditable(false);
+        txtMinVal.setFocusable(false);
+        txtMinVal.setHorizontalAlignment(JTextField.CENTER);
+        this.targetTimingsMin.put(currTimingName, txtMinVal);
+
+        //5. Build text field for the target cycle time.
+        JTextField txtNSVal = new JTextField();
+        txtNSVal.setColumns(3);
+        txtNSVal.setName("txtNSVal" + currTimingName);
+        txtNSVal.setEditable(false);
+        txtNSVal.setFocusable(false);
+        txtNSVal.setHorizontalAlignment(JTextField.CENTER);
+        this.targetTimingsCalc.put(currTimingName, txtNSVal);
+
+        //6. Build text field for the maximum target value.
+        JTextField txtMaxVal = new JTextField();
+        txtMaxVal.setColumns(3);
+        txtMaxVal.setName("txtMaxVal" + currTimingName);
+        txtMaxVal.setEditable(false);
+        txtMaxVal.setFocusable(false);
+        txtMaxVal.setHorizontalAlignment(JTextField.CENTER);
+        this.targetTimingsMax.put(currTimingName, txtMaxVal);
+
+        //Add inputs of current row to the panel.
+        parent.add(lbl);
+        parent.add(js);
+        parent.add(txtNS);
+        parent.add(txtMinVal);
+        parent.add(txtNSVal);
+        parent.add(txtMaxVal);
+    }
+
+    private JSpinner createJHighlightSpinner(SpinnerModel model) {
+
+        //Build a highligh spinner with the provided model and the configured highlight color.
+        JHighlightSpinner js = new JHighlightSpinner(
+                model,
+                new Color(AppConstants.SPINNER_HIGHLIGHT_COLOR));
+
+        //Add a MouseWheelListener to allow the spinner to be mousewheel scrolled.
+        js.addMouseWheelListener(new SpinnerMouseWheelModel());
+        return js;
+    }
+
+    private synchronized Action getCalculateAction() {
+        if (this._calculateActionInstance == null)
+            this._calculateActionInstance = new CalculateAction(this);
+        return this._calculateActionInstance;
+    }
+
+    /**
      * @return javax.swing.Border
-     *
+     * <p>
      * Returns an empty border that provides the standard padding for labels created for timing text fields.
      */
     private Border getTimingFieldLabelBorder() {
@@ -377,7 +455,7 @@ public class RAMTimingCalculator {
 
     /**
      * @return javax.swing.Border
-     *
+     * <p>
      * Returns an empty border that provides the standard padding for labels created for timing text fields.
      */
     private Border getSpeedSelectionLabelBorder() {
@@ -392,34 +470,17 @@ public class RAMTimingCalculator {
     //////////////////////////////// STATIC ELEMENTS ///////////////////////////////
     //                                                                            //
     // This section contains all static objects defined by the main application   //
-    // class.
+    // class.                                                                     //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
 
     //Version number string for reference in logging.
-    public static final String version = "0.0.0";
-
-    /**
-     * @param args there are none.
-     *
-     * Core application class constructor takes care of initialization.
-     */
-    public static void main(String[] args) {
-        long st = System.currentTimeMillis();
-
-        //Set logging level if command line argument set for it.
-        if (args.length > 0)
-            Logger.setLogLevelByName(args[0]);
-
-        //Init app
-        new RAMTimingCalculator();
-        Logger.debug("App started in " + (System.currentTimeMillis() - st) + " ms");
-    }
+    public static final String version = "0.0.1";
 
     /**
      * @param defaultSpeed to starting value to set in the spinner
      * @return SpinnerModel
-     *
+     * <p>
      * Utility method to build SpinnerModels for the speed selections.
      */
     public static SpinnerModel getSpeedSelectionModel(int defaultSpeed) {
@@ -433,9 +494,9 @@ public class RAMTimingCalculator {
      * @param js JSpinner with the value to parse to long
      * @return numeric value in the text field if valid.
      * @throws NumberFormatException if non-nil value is not an integer.
-     *
-     * Convenience function that performs the boiler-plate operation of obtaining the text value from a JTextfield and
-     * parsing it to a long value for calculations.
+     *                               <p>
+     *                               Convenience function that performs the boiler-plate operation of obtaining the text value from a JTextfield and
+     *                               parsing it to a long value for calculations.
      */
     public static Long getLongValueFromTextField(JSpinner js) throws NumberFormatException {
         if (js == null)
@@ -452,9 +513,9 @@ public class RAMTimingCalculator {
 
     /**
      * @param message - the message to show on screen
-     * @param title - the text to show on the header of the error popup window
-     *
-     * Global method for triggering an error message popup.
+     * @param title   - the text to show on the header of the error popup window
+     *                <p>
+     *                Global method for triggering an error message popup.
      */
     public static void triggerErrorDialog(String message, String title) {
         if (message == null)
@@ -472,6 +533,12 @@ public class RAMTimingCalculator {
 
         //name of the Icon image to try to load.
         public static final String ICON_IMAGE_NAME = "icon-memory-calc.png";
+
+        //names for app initializer parameters
+        public static final String LOG_LEVEL = "LOGLEVEL";
+
+        //Color used as the "highlight" color for the JHighlightSpinners.
+        public static final int SPINNER_HIGHLIGHT_COLOR = 0x00FFFF80;
 
         //Application display name.
         public static final String APP_NAME = "DDR Memory Timing Calculator";
@@ -533,7 +600,7 @@ public class RAMTimingCalculator {
                 new TimingDefinitionStruct("tWRRD", "", 1, 3, 15),
                 new TimingDefinitionStruct("tRDWR", "", 1, 15, 31),
                 new TimingDefinitionStruct("tCWL", "", 1, 30, Integer.MAX_VALUE),
-                new TimingDefinitionStruct("tCKE", "", 1, 0, Integer.MAX_VALUE),
+                new TimingDefinitionStruct("tCKE", "", 0, 0, Integer.MAX_VALUE),
                 new TimingDefinitionStruct("tMOD", "", 1, 42, Integer.MAX_VALUE),
                 new TimingDefinitionStruct("tMODPDA", "", 1, 32, Integer.MAX_VALUE),
                 new TimingDefinitionStruct("tSTAG", "", 1, 7, Integer.MAX_VALUE),

@@ -1,7 +1,11 @@
 package com.derekpage.RAMTimingCalculator.ui;
 
+import com.derekpage.RAMTimingCalculator.config.AppConfig;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * This subclass of JFrame simply exists to encapsulate default JFrame options we always want to apply.
@@ -35,8 +39,18 @@ public class MainFrame extends JFrame {
      */
     protected void init() {
 
-        //Default to EXIT_ON_CLOSE
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //App main frame will DISPOSE_ON_CLOSE so we can run exit processing.
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
+
+        //Save current state to the config file on app exit.
+        this.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                AppConfig.getInstance().saveToConfFile();
+                super.windowClosed(e);
+            }
+        });
     }
 }

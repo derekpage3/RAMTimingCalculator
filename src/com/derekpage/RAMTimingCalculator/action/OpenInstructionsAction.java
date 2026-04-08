@@ -12,16 +12,28 @@ import java.net.URI;
  */
 public class OpenInstructionsAction extends AbstractAction {
 
-    public OpenInstructionsAction() {
+    //Reference to the RAMTimingCalculator for using utility functions.
+    private RAMTimingCalculator _converter = null;
+
+    public OpenInstructionsAction(RAMTimingCalculator _converter) {
         super();
+        this.init(_converter);
     }
 
-    public OpenInstructionsAction(String name) {
+    public OpenInstructionsAction(RAMTimingCalculator _converter, String name) {
         super(name);
+        this.init(_converter);
     }
 
-    public OpenInstructionsAction(String name, Icon icon) {
+    public OpenInstructionsAction(RAMTimingCalculator _converter, String name, Icon icon) {
         super(name, icon);
+        this.init(_converter);
+    }
+
+    protected void init(RAMTimingCalculator _converter) {
+        if (_converter == null)
+            throw new IllegalArgumentException("Parameter '_converter' is required!");
+        this._converter = _converter;
     }
 
     @Override
@@ -33,7 +45,7 @@ public class OpenInstructionsAction extends AbstractAction {
             Desktop desk = Desktop.getDesktop();
             desk.browse(appURI);
         } catch (Exception ex) {
-            RAMTimingCalculator.triggerErrorDialog("ERROR: " + ex.getMessage(), "ERROR");
+            this._converter.triggerErrorDialog("ERROR: " + ex.getMessage(), "ERROR");
         }
     }
 }

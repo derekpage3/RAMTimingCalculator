@@ -19,12 +19,12 @@ public class CalculateAction extends AbstractAction {
         this._converter = _converter;
     }
 
-    public CalculateAction(String name, RAMTimingCalculator _converter) {
+    public CalculateAction(RAMTimingCalculator _converter, String name) {
         super(name);
         this._converter = _converter;
     }
 
-    public CalculateAction(String name, Icon icon, RAMTimingCalculator _converter) {
+    public CalculateAction(RAMTimingCalculator _converter, String name, Icon icon) {
         super(name, icon);
         this._converter = _converter;
     }
@@ -174,7 +174,7 @@ public class CalculateAction extends AbstractAction {
 
         //Trigger the application's error popup on any errors.
         } catch (Exception ex) {
-            RAMTimingCalculator.triggerErrorDialog(ex.getMessage(), "");
+            this._converter.triggerErrorDialog(ex.getMessage(), null);
         }
     }
 }

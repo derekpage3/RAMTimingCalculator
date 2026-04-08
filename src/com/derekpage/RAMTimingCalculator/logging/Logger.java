@@ -1,8 +1,9 @@
 package com.derekpage.RAMTimingCalculator.logging;
 
 /**
- * A crude scaled down version of the log4j logging framework, simplified for this small app.  At some point this should
- * probably be moved to java.util.logging.
+ * A crude scaled down version of the log4j logging framework, simplified for this small app. It adopts the basic API
+ * of a log4j Logger, but condenses the logging mechanism down to a single shared static class without appenders and
+ * the other complex configuration stuff. At some point this may be moved to java.util.logging.
  */
 public class Logger {
 
@@ -13,6 +14,10 @@ public class Logger {
     }
 
     /// LOGGING METHODS ///
+
+    public static void trace(Object m) {
+        Logger._doLog(LogLevel.TRACE, m);
+    }
 
     public static void debug(Object m) {
         Logger._doLog(LogLevel.DEBUG, m);
@@ -36,34 +41,96 @@ public class Logger {
 
     /// Log level setting methods. ///
 
-    public static void setLogLevelDebug() {
-        synchronized (Logger.class) {
-            Logger.currentLevel = LogLevel.DEBUG;
-        }
+    public static synchronized void setLogLevelAll() {
+        Logger.currentLevel = LogLevel.ALL;
     }
 
-    public static void setLogLevelError() {
-        synchronized (Logger.class) {
-            Logger.currentLevel = LogLevel.ERROR;
-        }
+    public static synchronized void setLogLevelTrace() {
+            Logger.currentLevel = LogLevel.TRACE;
     }
 
-    public static void setLogLevelInfo() {
-        synchronized (Logger.class) {
+    public static synchronized void setLogLevelDebug() {
+        Logger.currentLevel = LogLevel.DEBUG;
+    }
+
+    public static synchronized void setLogLevelError() {
+        Logger.currentLevel = LogLevel.ERROR;
+    }
+
+    public static synchronized void setLogLevelInfo() {
             Logger.currentLevel = LogLevel.INFO;
-        }
     }
 
-    public static void setLogLevelWarn() {
-        synchronized (Logger.class) {
-            Logger.currentLevel = LogLevel.WARN;
-        }
+    public static synchronized void setLogLevelWarn() {
+        Logger.currentLevel = LogLevel.WARN;
     }
 
-    public static void setLogLevelFatal() {
-        synchronized (Logger.class) {
-            Logger.currentLevel = LogLevel.FATAL;
-        }
+    public static synchronized void setLogLevelFatal() {
+        Logger.currentLevel = LogLevel.FATAL;
+    }
+
+    public static synchronized void setLogLevelOff() {
+        Logger.currentLevel = LogLevel.OFF;
+    }
+
+    /// Log level enabled checking methods ///
+
+    public static boolean isLogLevelTraceEnabled() {
+        return currentLevel.getLevelNum() <= LogLevel.TRACE.getLevelNum();
+    }
+
+    public static boolean isLogLevelDebugEnabled() {
+        return currentLevel.getLevelNum() <= LogLevel.DEBUG.getLevelNum();
+    }
+
+    public static boolean isLogLevelErrorEnabled() {
+        return currentLevel.getLevelNum() <= LogLevel.ERROR.getLevelNum();
+    }
+
+    public static boolean isLogLevelInfoEnabled() {
+        return currentLevel.getLevelNum() <= LogLevel.INFO.getLevelNum();
+    }
+
+    public static boolean isLogLevelWarnEnabled() {
+        return currentLevel.getLevelNum() <= LogLevel.WARN.getLevelNum();
+    }
+
+    public static boolean isLogLevelFatalEnabled() {
+        return currentLevel.getLevelNum() <= LogLevel.FATAL.getLevelNum();
+    }
+
+    /// Log level equality checking methods ///
+
+    public static boolean isLogLevelAll() {
+        return currentLevel.getLevelNum() == LogLevel.ALL.getLevelNum();
+    }
+
+    public static boolean isLogLevelTrace() {
+        return currentLevel.getLevelNum() == LogLevel.TRACE.getLevelNum();
+    }
+
+    public static boolean isLogLevelDebug() {
+        return currentLevel.getLevelNum() == LogLevel.DEBUG.getLevelNum();
+    }
+
+    public static boolean isLogLevelError() {
+        return currentLevel.getLevelNum() == LogLevel.ERROR.getLevelNum();
+    }
+
+    public static boolean isLogLevelInfo() {
+        return currentLevel.getLevelNum() == LogLevel.INFO.getLevelNum();
+    }
+
+    public static boolean isLogLevelWarn() {
+        return currentLevel.getLevelNum() == LogLevel.WARN.getLevelNum();
+    }
+
+    public static boolean isLogLevelFatal() {
+        return currentLevel.getLevelNum() == LogLevel.FATAL.getLevelNum();
+    }
+
+    public static boolean isLogLevelOff() {
+        return currentLevel.getLevelNum() == LogLevel.OFF.getLevelNum();
     }
 
     /**
@@ -71,55 +138,40 @@ public class Logger {
      *
      * Allows for progammatically setting the log level (used to allow setting it via command line).
      */
-    public static void setLogLevelByName(String levelName) {
+    public static synchronized void setLogLevelByName(String levelName) {
         if (levelName == null || levelName.isEmpty())
             throw new IllegalArgumentException("Parameter 'levelName' is required!");
 
-        synchronized (Logger.class) {
-            switch (levelName.toUpperCase()) {
-                case "DEBUG":
-                    Logger.setLogLevelDebug();
-                    break;
-                case "ERROR":
-                    Logger.setLogLevelError();
-                    break;
-                case "INFO":
-                    Logger.setLogLevelInfo();
-                    break;
-                case "WARN":
-                    Logger.setLogLevelWarn();
-                    break;
-                case "FATAL":
-                    Logger.setLogLevelFatal();
-                    break;
+        switch (levelName.toUpperCase()) {
+            case "ALL":
+                Logger.setLogLevelAll();
+                break;
+            case "TRACE":
+                Logger.setLogLevelTrace();
+                break;
+            case "DEBUG":
+                Logger.setLogLevelDebug();
+                break;
+            case "ERROR":
+                Logger.setLogLevelError();
+                break;
+            case "INFO":
+                Logger.setLogLevelInfo();
+                break;
+            case "WARN":
+                Logger.setLogLevelWarn();
+                break;
+            case "FATAL":
+                Logger.setLogLevelFatal();
+                break;
+            case "OFF":
+                Logger.setLogLevelOff();
+                break;
 
-                //error on anything that's not a supported log level.
-                default:
-                    throw new IllegalArgumentException("Parameter 'levelName' value '" + levelName + "' is not a valid logging level!");
-            }
+            //error on anything that's not a supported log level.
+            default:
+                throw new IllegalArgumentException("Parameter 'levelName' value '" + levelName + "' is not a valid logging level!");
         }
-    }
-
-    /// Log level checking methods ///
-
-    public static boolean isLogLevelDebug() {
-        return currentLevel.getLevelNum() <= LogLevel.DEBUG.getLevelNum();
-    }
-
-    public static boolean isLogLevelError() {
-        return currentLevel.getLevelNum() <= LogLevel.ERROR.getLevelNum();
-    }
-
-    public static boolean isLogLevelInfo() {
-        return currentLevel.getLevelNum() <= LogLevel.INFO.getLevelNum();
-    }
-
-    public static boolean isLogLevelWarn() {
-        return currentLevel.getLevelNum() <= LogLevel.WARN.getLevelNum();
-    }
-
-    public static boolean isLogLevelFatal() {
-        return currentLevel.getLevelNum() <= LogLevel.FATAL.getLevelNum();
     }
 
     /**
@@ -136,20 +188,24 @@ public class Logger {
         if (Logger.currentLevel.getLevelNum() > level.getLevelNum())
             return;
 
-        //if null then just add a empty line.
+        //if null then just add an empty line.
         System.out.println("[" + level + "]: " + ((o == null) ? "" : o.toString()));
     }
 
 
     /**
-     * Enum defines the logging levels allowed.
+     * Inner Enum defines the logging levels allowed.
      */
     private enum LogLevel {
+
+        ALL(Integer.MIN_VALUE, "ALL"),
+        TRACE (5000, "TRACE"),
         DEBUG(10000, "DEBUG"),
         INFO(20000, "INFO"),
         WARN(30000, "WARN"),
         ERROR(40000, "ERROR"),
-        FATAL(50000, "FATAL");
+        FATAL(50000, "FATAL"),
+        OFF(Integer.MAX_VALUE, "OFF");
 
         //integer number for logging level settings.
         private int levelNum;

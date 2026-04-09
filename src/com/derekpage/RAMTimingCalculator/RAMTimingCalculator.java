@@ -4,6 +4,7 @@ import com.derekpage.RAMTimingCalculator.action.AboutMenuAction;
 import com.derekpage.RAMTimingCalculator.action.CalculateAction;
 import com.derekpage.RAMTimingCalculator.action.OpenInstructionsAction;
 import com.derekpage.RAMTimingCalculator.action.SpinnerMouseWheelModel;
+import com.derekpage.RAMTimingCalculator.config.AppConfig;
 import com.derekpage.RAMTimingCalculator.data.TimingDefinitionStruct;
 import com.derekpage.RAMTimingCalculator.html.HTMLLoader;
 import com.derekpage.RAMTimingCalculator.img.ImageLoader;
@@ -41,6 +42,9 @@ public class RAMTimingCalculator {
     private final Map<String, JTextField> targetTimingsCalc = new HashMap<>(AppConstants.RAM_TIMINGS.length);
     private final Map<String, JTextField> targetTimingsMax = new HashMap<>(AppConstants.RAM_TIMINGS.length);
 
+    //Application configuration object.
+    private AppConfig appConfig;
+
     /**
      * @param args:
      *            LogLevel=<Logger level>
@@ -49,6 +53,9 @@ public class RAMTimingCalculator {
      */
     public static void main(String[] args) {
         long st = System.currentTimeMillis();
+
+        //Default disable logging (in normal use in the GUI, the user will not see any log statements anyway).
+        Logger.setLogLevelOff();
 
         //Set logging level if command line argument set for it.
         for (String arg : args) {
@@ -70,9 +77,24 @@ public class RAMTimingCalculator {
      */
     public RAMTimingCalculator() {
 
-        //Build the top-level frame.
+        //Build the top-level frame, but don't show until initialized.
         JFrame mf = new MainFrame(AppConstants.APP_NAME);
         this.mf = mf;
+
+        //Load app configuration.
+        try {
+            this.appConfig = AppConfig.getInstance();
+        } catch (Exception e) {
+            Logger.error("Error durring app initialization: " + e.getMessage());
+
+            //Alert user to the error before closing the app.
+            this.triggerErrorDialog("Initialization error: '" + e.getMessage()
+                    + "'; Application will now exit.", "Initialization Error");
+
+            //Kill top frame and close app.
+            mf.dispose();
+            System.exit(1);
+        }
 
         //Initialize app panels
         this.initializeAppIconImage();
@@ -85,6 +107,23 @@ public class RAMTimingCalculator {
         //TODO now can you make it save and restore it's last position? ;)
         this.packAndCenterApp();
         mf.setVisible(true);
+    }
+
+    /**
+     * @param message - the message to show on screen
+     * @param title   - the text to show on the header of the error popup window
+     *
+     * Utility function for alerting user to unexpected errors. As of this version it simply pops a standard
+     * Swing JOptionPane error dialog.
+     */
+    public void triggerErrorDialog(String message, String title) {
+        if (message == null || message.isEmpty())
+            message = "Unknown error occurred!";
+        if (title == null || title.isEmpty())
+            title = "Error Dialog";
+
+        //Show error via a standard Swing JOptionPane error dialog.
+        JOptionPane.showMessageDialog(this.mf, message,title, JOptionPane.ERROR_MESSAGE);
     }
 
     /// getter/setter ///
@@ -196,7 +235,7 @@ public class RAMTimingCalculator {
         JLabel lblTargetTimingCalc = this.createHeaderLabel("Calc", "hdrCalc", "The scaled timing value based on the source to target speed conversion.");
         JLabel lblHigherTiming = this.createHeaderLabel("Higher", "hdrHigher", "The highest integer value for this timing based on the calculated conversion; this SHOULD be stable for most timings as it will always equate to the source cycle time or more.");
 
-        //Create the header font and set on header labels. For this we take whatever the default size is that the
+        //Create the header font and set on header labels. For this we take whatever the default font and size is that the
         //system sets and then add a few point sizes to make it stand out.
         hdrFont = new Font(lblTimingName.getFont().getFontName(),
                 lblTimingName.getFont().getStyle(),
@@ -268,7 +307,7 @@ public class RAMTimingCalculator {
         jmb.add(jm);
 
         //Add menu item for instructions.
-        JMenuItem jmi = new JMenuItem(new OpenInstructionsAction("Instructions"));
+        JMenuItem jmi = new JMenuItem(new OpenInstructionsAction(this,"Instructions"));
         jm.add(jmi);
 
         //Add simple "About" application popup.
@@ -474,9 +513,6 @@ public class RAMTimingCalculator {
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
 
-    //Version number string for reference in logging.
-    public static final String version = "0.0.1";
-
     /**
      * @param defaultSpeed to starting value to set in the spinner
      * @return SpinnerModel
@@ -511,19 +547,8 @@ public class RAMTimingCalculator {
         return ((Integer) srcVal).longValue();
     }
 
-    /**
-     * @param message - the message to show on screen
-     * @param title   - the text to show on the header of the error popup window
-     *                <p>
-     *                Global method for triggering an error message popup.
-     */
-    public static void triggerErrorDialog(String message, String title) {
-        if (message == null)
-            throw new RuntimeException("Parameter 'message' is required!");
-        if (title == null || title.isEmpty())
-            title = "Error";
-        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
-    }
+    //Version number string for reference in logging.
+    public static final String version = "0.0.2";
 
     /**
      * This static class defines the app constants that govern the applications behavior and other configuration
